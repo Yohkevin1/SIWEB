@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\Book as BookModel;
 use App\Models\Kategori_Book;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 define('_Tittle', 'Buku');
 class C_Book extends BaseController
@@ -292,6 +294,44 @@ class C_Book extends BaseController
             ]);
         }
         session()->setFlashdata('success', 'Data berhasil dihapus');
+        return redirect()->to('/book');
+    }
+
+    public function import()
+    {
+        $file = $this->request->getFile("file");
+        $ext = $file->getExtension();
+        if ($ext == "xls")
+            $reader = new Xls();
+        else
+            $reader = new Xlsx();
+
+        $excel = $reader->load($file);
+        $sheet = $excel->getActiveSheet()->toArray();
+
+        foreach ($sheet as $key => $value) {
+            if ($key == 0) continue;
+
+            $namaFile = $this->defaultImage;
+            $slug = url_title($value[1], ' ', true);
+
+            $dataLama = $this->book_model->cekJudul($slug);
+            if (!$dataLama) {
+                $this->book_model->save([
+                    'judul_buku' => $value[1],
+                    'tahun_terbit' => $value[2],
+                    'penerbit' => $value[3],
+                    'penulis' => $value[4],
+                    'id_kategori' => $value[5],
+                    'diskon' => $value[6],
+                    'harga' => $value[7],
+                    'jumlah' => $value[8],
+                    'gambar' => $namaFile
+                ]);
+                session()->setFlashdata('success', 'Data berhasil diimport');
+            }
+        }
+
         return redirect()->to('/book');
     }
 }

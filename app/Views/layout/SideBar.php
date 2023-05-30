@@ -42,10 +42,9 @@
                     <div class="collapse" id="Pembelian" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
                             <a class="nav-link" href="<?= base_url('beli') ?>">Transaksi</a>
-                            <a class="nav-link" href="">Laporan</a>
+                            <a class="nav-link" href="<?= base_url('beli/laporan') ?>">Laporan</a>
                         </nav>
                     </div>
-
 
                     <div class="sb-sidenav-menu-heading">Guided & Unguided</div>
 

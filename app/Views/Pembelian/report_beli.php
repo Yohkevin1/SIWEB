@@ -15,7 +15,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Filter -->
-                    <form action="<?= base_url('jual/laporan/filter') ?>" method="post">
+                    <form action="<?= base_url('beli/laporan/filter') ?>" method="post">
                         <div class="container">
                             <div class="row">
                                 <div class="col-4">
@@ -32,9 +32,9 @@
                     </form>
                     <br>
                     <!-- Laporan -->
-                    <a target="_blank" class="btn btn-primary mb-3" type="button" href="/jual/exportPDF">
+                    <a target="_blank" class="btn btn-primary mb-3" type="button" href="/beli/exportPDF">
                         Export PDF</a>
-                    <a class="btn btn-dark mb-3" type="button" href="/jual/exportExcel">
+                    <a class="btn btn-dark mb-3" type="button" href="/beli/exportExcel">
                         Export Excel</a>
                     <table id="datatablesSimple">
                         <thead>
@@ -43,23 +43,22 @@
                                 <th>Nota</th>
                                 <th>Tanggal Transaksi</th>
                                 <th>User</th>
-                                <th>Customer</th>
+                                <th>Supplier</th>
                                 <th>Total</th>
                                 <th>Aksi</th>
-                            </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1;
                             foreach ($laporan as $value) : ?>
                                 <tr>
                                     <td><?= $no++ ?></td>
-                                    <td><?= $value['sale_id'] ?></td>
+                                    <td><?= $value['buy_id'] ?></td>
                                     <td><?= date("d/m/Y H:i:s", strtotime($value['tgl_transaksi']))  ?></td>
                                     <td><?= $value['firstname'] ?> <?= $value['lastname'] ?></td>
-                                    <td><?= $value['nama_cust'] ?></td>
+                                    <td><?= $value['nama_supp'] ?></td>
                                     <td><?= number_to_currency($value['Total'], 'IDR', 'id_ID', 2)  ?></td>
                                     <td>
-                                        <a class="btn btn-danger mb-3" type="button" href="<?= base_url('/jual/invoice') ?>/<?= $value['sale_id'] ?>">
+                                        <a class="btn btn-danger mb-3" type="button" href="<?= base_url('/beli/invoice') ?>/<?= $value['buy_id'] ?>">
                                             Cetak
                                         </a>
                                     </td>

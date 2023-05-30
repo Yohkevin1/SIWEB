@@ -7,7 +7,8 @@ use \App\Models\Customer;
 use \App\Models\sale_detail;
 use \App\Models\sale;
 use TCPDF;
-use PhpOffice\PhpSpreadsheet;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class C_Penjualan extends BaseController
 {
@@ -212,19 +213,33 @@ class C_Penjualan extends BaseController
         }
     }
 
-    public function report()
+    public function report($tgl_awal = null, $tgl_akhir = null)
     {
-        $laporan = $this->sale->getReport();
+        $_SESSION['tgl_awal'] = $tgl_awal == null ? date('Y-m-01') : $tgl_awal;
+        $_SESSION['tgl_akhir'] = $tgl_akhir == null ? date('Y-m-t') : $tgl_akhir;
+
+        $tgl1 = $_SESSION['tgl_awal'];
+        $tgl2 = $_SESSION['tgl_akhir'];
+
+        $laporan = $this->sale->getReport($tgl1, $tgl2);
         $data = [
             'title' => 'Laporan Penjualan',
-            'laporan' => $laporan
+            'laporan' => $laporan,
+            'tanggal' => [
+                'tgl_awal' => $tgl1,
+                'tgl_akhir' => $tgl2,
+            ],
         ];
+        // dd($laporan);
         return view('Penjualan/report', $data);
     }
 
     public function exportPDF()
     {
-        $laporan = $this->sale->getReport();
+        $tgl1 = $_SESSION['tgl_awal'];
+        $tgl2 = $_SESSION['tgl_akhir'];
+
+        $laporan = $this->sale->getReport($tgl1, $tgl2);
         $data = [
             'title' => 'Laporan Penjualan',
             'laporan' => $laporan,
@@ -238,5 +253,74 @@ class C_Penjualan extends BaseController
         $pdf->writeHTML($html);
         $this->response->setContentType('apllication/pdf');
         $pdf->Output('Laporan-Penjualan.pdf', 'I');
+    }
+
+    public function exportInvoice($id)
+    {
+        $laporan = $this->sale->getInvoice($id);
+        $data = [
+            'title' => 'Invoice Penjualan',
+            'laporan' => $laporan,
+        ];
+        // dd($laporan);
+        $html = view('Penjualan/invoice', $data);
+
+        $pdf = new TCPDF('L', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTS-8', false);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->AddPage();
+        $pdf->writeHTML($html);
+        $this->response->setContentType('apllication/pdf');
+        $pdf->Output('Invoice-Penjualan.pdf', 'I');
+    }
+
+    public function exportExcel()
+    {
+        $tgl1 = $_SESSION['tgl_awal'];
+        $tgl2 = $_SESSION['tgl_akhir'];
+
+        $laporan = $this->sale->getReport($tgl1, $tgl2);
+        $spreadsheet = new Spreadsheet();
+
+        //tulis header/nama kolom
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue('A1', 'No')
+            ->setCellValue('B1', 'Nota')
+            ->setCellValue('C1', 'Tgl Transaksi')
+            ->setCellValue('D1', 'User')
+            ->setCellValue('E1', 'Customer')
+            ->setCellValue('F1', 'Total');
+
+        //tulis data buku ke cell
+        $rows = 2;
+        $no = 1;
+        foreach ($laporan as $value) {
+            $spreadsheet->setActiveSheetIndex(0)
+                ->setCellValue('A' . $rows, $no++)
+                ->setCellValue('B' . $rows, $value['sale_id'])
+                ->setCellValue('C' . $rows, $value['tgl_transaksi'])
+                ->setCellValue('D' . $rows, $value['firstname'] . ' ' . $value['lastname'])
+                ->setCellValue('E' . $rows, $value['nama_cust'])
+                ->setCellValue('F' . $rows, $value['Total']);
+            $rows++;
+        }
+
+        //tulis dalam format xlsx
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Laporan-Penjualan';
+
+        //redirect hasil generate xlsx ke web client
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
+    public function filter()
+    {
+        $_SESSION['tgl_awal'] = $this->request->getVar('tgl_awal');
+        $_SESSION['tgl_akhir'] = $this->request->getVar('tgl_akhir');
+        return $this->report($_SESSION['tgl_awal'], $_SESSION['tgl_akhir']);
     }
 }

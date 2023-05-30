@@ -149,6 +149,9 @@
                     load();
                     $('#nominal').val("");
                     $('#kembalian').val(result.data.kembalian);
+                    // setTimeout(function() {
+                    //     location.reload('');
+                    // }, 2000); // Refresh halaman setelah 5 detik (5000 milidetik)
                 }
             })
         }

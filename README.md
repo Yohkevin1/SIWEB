@@ -650,9 +650,4 @@ able to change and this is causing a development and an end-user confusion. It i
 need to specify which fields with `$crud->setTexteditor`
 * `unsetOperations` (previously `unset_operations`) is not removing the print and the export ability
 
-For more information, visit http://www.grocerycrud.com#   s i w e b  
- #   S I W E B  
- #   N E W S I W E B  
- #   S I W E B  
- #   S I W E B  
- 
+For more information, visit http://www.grocerycrud.com

@@ -24,15 +24,12 @@ class Book extends Model
             $this->where(['id_buku' => $id]);
             return $this->first();
         }
-
-
-        // $query = $this->db->query("select * from tbl_buku join tbl_kategori using (id_kategori)")->getResultArray();
-        // return $query;
     }
 
-    public function insertData($data)
+    public function cekJudul($slug = false)
     {
-        // $this->db->insertID($data);
-        // return $this->db->affected_rows();
+        $this->join('tbl_kategori', 'tbl_buku.id_kategori = tbl_kategori.id_kategori');
+        $this->where(['judul_buku' => $slug]);
+        return $this->first();
     }
 }

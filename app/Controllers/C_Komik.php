@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\Komik as KomikModel;
 use App\Models\Kategori_Book;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 define('_Tittle', 'Komik');
 class C_Komik extends BaseController
@@ -266,6 +268,44 @@ class C_Komik extends BaseController
             ]);
         }
         session()->setFlashdata('success', 'Data berhasil dihapus');
+        return redirect()->to('/komik');
+    }
+
+    public function import()
+    {
+        $file = $this->request->getFile("file");
+        $ext = $file->getExtension();
+        if ($ext == "xls")
+            $reader = new Xls();
+        else
+            $reader = new Xlsx();
+
+        $excel = $reader->load($file);
+        $sheet = $excel->getActiveSheet()->toArray();
+
+        foreach ($sheet as $key => $value) {
+            if ($key == 0) continue;
+
+            $namaFile = $this->defaultImage;
+            $slug = url_title($value[1], ' ', true);
+            // dd($slug);
+            $dataLama = $this->komik_model->cekJudul($slug);
+
+            if (!$dataLama) {
+                $this->komik_model->save([
+                    'judul' => $value[1],
+                    'tahun_rilis' => $value[2],
+                    'penulis' => $value[3],
+                    'id_kategori' => $value[4],
+                    'diskon' => $value[5],
+                    'harga' => $value[6],
+                    'stock' => $value[7],
+                    'cover' => $namaFile
+                ]);
+                session()->setFlashdata('success', 'Data berhasil diimport');
+            }
+        }
+
         return redirect()->to('/komik');
     }
 }
