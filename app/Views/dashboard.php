@@ -1,6 +1,8 @@
 <?= $this->extend('layout/template') ?>
 
 <?= $this->section('content') ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -60,9 +62,15 @@
                             </div>
                         </div>
                         <div class="card-body"><canvas id="chartTransaksi" width="100%" height="40"></canvas></div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadChartTrans('PDF')">Unduh PDF</button>
+                            <a id="download-trans" download="chart-transaksi.png">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadChartTrans('PNG')">Unduh PNG</button>
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-xl-6">
+                <div class=" col-xl-6">
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-chart-bar me-1"></i>
@@ -72,6 +80,49 @@
                             </div>
                         </div>
                         <div class="card-body"><canvas id="chartCust" width="100%" height="40"></canvas></div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadChartCust('PDF')">Unduh PDF</button>
+                            <a id="download-cust" download="chart-Customer.png">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadChartCust('PNG')">Unduh PNG</button>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-chart-area me-1"></i>
+                            Grafik Transaksi pembelian
+                            <div class="col-sm-2 mt-3">
+                                <input type="number" id="tahun-beli" class="form-control" value="<?= date('Y') ?>" onchange="chartPembelian()">
+                            </div>
+                        </div>
+                        <div class="card-body"><canvas id="chartPembelian" width="100%" height="40"></canvas></div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadChartBeli('PDF')">Unduh PDF</button>
+                            <a id="download-Beli" download="chart-Pembelian.png">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadChartBeli('PNG')">Unduh PNG</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar me-1"></i>
+                            Grafik Supplier
+                            <div class="col-sm-2 mt-3">
+                                <input type="number" id="tahun-supp" class="form-control" value="<?= date('Y') ?>" onchange="chartSupp()">
+                            </div>
+                        </div>
+                        <div class="card-body"><canvas id="chartSupp" width="100%" height="40"></canvas></div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadChartSupp('PDF')">Unduh PDF</button>
+                            <a id="download-Supp" download="chart-Supplier.png">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadChartSupp('PNG')">Unduh PNG</button>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -572,8 +623,9 @@
         $(document).ready(function() {
             chartTransaksi()
             chartCust();
+            chartSupp();
+            chartPembelian();
         })
-
         // Area Chart Example
         function setLineChart(dataset) {
             var ctx = document.getElementById("chartTransaksi");
@@ -708,6 +760,181 @@
                     setBarChart(dataset)
                 }
             })
+        }
+
+        function setPieChartBeli(dataset) {
+            var ctx = document.getElementById("chartPembelian");
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "April", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"],
+                    datasets: [{
+                        data: dataset,
+                        backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745', '#116A7B', '#FFCDA8', '#40128B', '#F6FA70',
+                            '#E55807', '#98EECC', '#A459D1', '#99627A'
+                        ],
+                    }],
+                },
+            });
+        }
+
+        function chartPembelian() {
+            // console.log('run');
+            var tahun = $('#tahun-beli').val();
+            $.ajax({
+                url: "/chart-beli",
+                method: "POST",
+                data: {
+                    'tahun': tahun,
+                },
+                success: function(response) {
+                    var result = JSON.parse(response)
+                    // console.log(result);
+                    dataset = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    $.each(result.data, function(i, val) {
+                        dataset[val.month - 1] = val.Total
+                    });
+                    setPieChartBeli(dataset)
+                }
+            })
+        }
+
+        // Bar Chart Example
+        function setBarChartSupp(dataset) {
+            var ctx = document.getElementById("chartSupp");
+            var myLineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "April", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"],
+                    datasets: [{
+                        label: "Jumlah",
+                        backgroundColor: "rgba(2,117,216,1)",
+                        borderColor: "rgba(2,117,216,1)",
+                        data: dataset,
+                    }],
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            time: {
+                                unit: 'month'
+                            },
+                            gridLines: {
+                                display: false
+                            },
+                            ticks: {
+                                maxTicksLimit: 6
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                maxTicksLimit: 5
+                            },
+                            gridLines: {
+                                display: true
+                            }
+                        }],
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            });
+        }
+
+        function chartSupp() {
+            console.log('run');
+            var tahun = $('#tahun-supp').val();
+            $.ajax({
+                url: "/chart-supp",
+                method: "POST",
+                data: {
+                    'tahun': tahun,
+                },
+                success: function(response) {
+                    var result = JSON.parse(response)
+                    console.log(result);
+                    dataset = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    $.each(result.data, function(i, val) {
+                        dataset[val.month - 1] = val.Total
+                    });
+                    setBarChartSupp(dataset)
+                }
+            })
+        }
+
+        function downloadChartIMG(download, chart) {
+            var img = chart.toDataURL("image/jpg", 1.0).replace("image/jpg", "image/octet-stream")
+            download.setAttribute("href", img)
+        }
+
+        function downloadChartPDF(chart, name) {
+            html2canvas(chart, {
+                onrendered: function(canvas) {
+                    var img = canvas.toDataURL("image/jpg", 1.0)
+                    var doc = new jsPDF('p', 'pt', 'A4')
+                    var lebarKonten = canvas.width
+                    var tinggiKonten = canvas.height
+                    var tinggiPage = lebarKonten / 592.28 * 841.89
+                    var leftHeight = tinggiKonten
+                    var Position = 0
+                    var imgWidth = 595.28
+                    var imgHegiht = 592.28 / lebarKonten * tinggiKonten
+                    if (leftHeight < tinggiPage) {
+                        doc.addImage(img, 'PNG', 0, 0, imgWidth, imgHegiht)
+                    } else {
+                        while (leftHeight > 0) {
+                            doc.addImage(img, 'PNG', 0, Position, imgWidth, imgHegiht)
+                            leftHeight -= tinggiPage
+                            Position -= 841.89
+                            if (leftHeight > 0) {
+                                pdf.addPage()
+                            }
+                        }
+                    }
+                    doc.save(name)
+                }
+            })
+        }
+
+        function downloadChartTrans(type) {
+            var download = document.getElementById('download-trans')
+            var chart = document.getElementById('chartTransaksi')
+            if (type == "PNG") {
+                downloadChartIMG(download, chart)
+            } else {
+                downloadChartPDF(chart, "Chart-Penjualan.pdf")
+            }
+        }
+
+        function downloadChartCust(type) {
+            var download = document.getElementById('download-cust')
+            var chart = document.getElementById('chartCust')
+            if (type == "PNG") {
+                downloadChartIMG(download, chart)
+            } else {
+                downloadChartPDF(chart, "Chart-Customer.pdf")
+            }
+        }
+
+        function downloadChartBeli(type) {
+            var download = document.getElementById('download-Beli')
+            var chart = document.getElementById('chartPembelian')
+            if (type == "PNG") {
+                downloadChartIMG(download, chart)
+            } else {
+                downloadChartPDF(chart, "Chart-Pembelian.pdf")
+            }
+        }
+
+        function downloadChartSupp(type) {
+            var download = document.getElementById('download-Supp')
+            var chart = document.getElementById('chartSupp')
+            if (type == "PNG") {
+                downloadChartIMG(download, chart)
+            } else {
+                downloadChartPDF(chart, "Chart-Supplier.pdf")
+            }
         }
     </script>
     <?= $this->endsection() ?>
