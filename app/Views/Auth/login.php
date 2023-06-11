@@ -34,11 +34,11 @@
                                 </div>
                         </form>
                     </div>
-                    <div class="card-footer text-center py-3 small">
-                        <!-- <div class=""> -->
-                        <a href="login-register">Register</a>
-                        <!-- </div> -->
-                    </div>
+                    <!-- <div class="card-footer text-center py-3 small"> -->
+                    <!-- <div class=""> -->
+                    <!-- <a href="login-register">Register</a> -->
+                    <!-- </div> -->
+                    <!-- </div> -->
                 </div>
                 <div class="card-footer text-center py-3">
                 </div>
