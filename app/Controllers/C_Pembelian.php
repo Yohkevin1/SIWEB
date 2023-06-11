@@ -264,7 +264,7 @@ class C_Pembelian extends BaseController
         $pdf->AddPage();
         $pdf->writeHTML($html);
         $this->response->setContentType('apllication/pdf');
-        $pdf->Output('Invoice-Penjualan.pdf', 'I');
+        $pdf->Output('Invoice-Pembelian.pdf', 'I');
     }
 
     public function exportExcel()
