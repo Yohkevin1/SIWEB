@@ -69,6 +69,7 @@ class C_Auth extends Controller
                     'username'      => $data['username'],
                     'email'         => $data['email'],
                     'role'          => $data['role'],
+                    'last_access_time' => time(),
                     'logged_in'     => TRUE
                 ];
                 $session->set($ses_data);

@@ -26,7 +26,7 @@
                 <li>
                     <hr class="dropdown-divider" />
                 </li>
-                <li><a class="dropdown-item" href="C_Auth/logout">Logout</a></li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
             </ul>
         </li>
     </ul>
